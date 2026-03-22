@@ -480,7 +480,14 @@
       const size = 75 + Math.random() * 15;
       const x    = Math.random() * Math.max(0, dim.w - size);
       const y    = dim.h + 20;
-      bEl.style.cssText = `width:${size}px; height:${size}px; left:${x}px; top:${y}px; background:${p.animal.color}dd;`;
+      // [FIX] cssText 대신 개별 style 속성 → .bubble 클래스의 flex/color 등 유지
+      bEl.style.width      = size + 'px';
+      bEl.style.height     = size + 'px';
+      bEl.style.left       = x + 'px';
+      bEl.style.top        = y + 'px';
+      bEl.style.background = p.animal.color + 'dd';
+      // [FIX] 숫자 텍스트 노드 추가
+      bEl.innerText = val;
       bEl.onpointerdown = (e) => { e.preventDefault(); handlePick(p, val, bEl); };
       area.appendChild(bEl);
       p.bubbles.push({
