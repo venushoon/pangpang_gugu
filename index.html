@@ -64,10 +64,10 @@
       border-right: 2px dashed rgba(0,0,0,0.1); overflow: hidden;
       padding: 100px 5px 30px 5px;
     }
-    .zone-0 { background: rgba(254, 243, 199, 0.2); --theme: #fbbf24; }
-    .zone-1 { background: rgba(252, 231, 243, 0.2); --theme: #f472b6; }
-    .zone-2 { background: rgba(236, 254, 255, 0.2); --theme: #22d3ee; }
-    .zone-3 { background: rgba(240, 253, 244, 0.2); --theme: #4ade80; }
+    .zone-0 { background: rgba(254,243,199,0.2); --theme: #fbbf24; }
+    .zone-1 { background: rgba(252,231,243,0.2); --theme: #f472b6; }
+    .zone-2 { background: rgba(236,254,255,0.2); --theme: #22d3ee; }
+    .zone-3 { background: rgba(240,253,244,0.2); --theme: #4ade80; }
 
     /* ── 문제 박스 ── */
     .question-box {
@@ -77,127 +77,133 @@
       border: 4.5px solid var(--theme); z-index: 50;
       animation: floatAnim 3s ease-in-out infinite; flex-shrink: 0;
     }
-    @keyframes floatAnim { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    @keyframes floatAnim { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
 
     /* ── HUD ── */
-    .bottom-hud {
-      width: 95%; display: flex;
-      justify-content: space-between; gap: 5px; flex-shrink: 0;
-    }
+    .bottom-hud { width:95%; display:flex; justify-content:space-between; gap:5px; flex-shrink:0; }
     .status-pill {
       background: white; padding: 6px 10px; border-radius: 50px;
       font-size: 14px; color: #334155; border: 2px solid var(--theme);
       box-shadow: 0 3px 5px rgba(0,0,0,0.05); flex: 1; text-align: center;
     }
 
-    /* ── 비눗방울 ── */
+    /* ══════════════════════════════════════════
+       비눗방울 핵심 수정 포인트
+       1. rgba() 배경색 (8자리 hex 미지원 환경 대응)
+       2. display:flex + align-items/justify-content (기본 중앙 정렬)
+       3. line-height 를 JS에서 size값으로 주입 → flex 미지원 시 fallback
+       4. text-align:center 명시
+       5. color:#1e293b (어두운 색) → 노란·초록·하늘 버블 위에서도 선명
+       6. font-family 명시 (상속 불확실한 환경 대비)
+       7. overflow:visible → 숫자가 잘리지 않도록
+    ══════════════════════════════════════════ */
     .bubble {
-      position: absolute; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: clamp(26px, 6vh, 38px); font-weight: bold; color: white;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer;
-      box-shadow: inset -5px -5px 10px rgba(255,255,255,0.4), 0 5px 12px rgba(0,0,0,0.15);
-      border: 3px solid rgba(255,255,255,0.8); z-index: 40;
-      transition: opacity 0.25s ease, transform 0.25s ease;
+      position: absolute;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-family: 'Jua', sans-serif;
+      font-size: clamp(20px, 4.5vw, 34px);
+      font-weight: bold;
+      color: #1e293b;
+      text-shadow: 0 1px 3px rgba(255,255,255,0.7);
+      cursor: pointer;
+      box-shadow:
+        inset -4px -4px 8px rgba(255,255,255,0.55),
+        inset  2px  2px 5px rgba(255,255,255,0.35),
+        0 5px 14px rgba(0,0,0,0.14);
+      border: 3px solid rgba(255,255,255,0.85);
+      z-index: 40;
+      overflow: visible;
+      transition: transform 0.18s ease, opacity 0.18s ease;
     }
-    /* [FIX] 오답 버블 흔들림 애니메이션 */
+
+    /* 오답 버블 흔들림 */
     @keyframes wrongShake {
-      0%, 100% { transform: translateX(0); }
-      20%       { transform: translateX(-8px); }
-      40%       { transform: translateX(8px); }
-      60%       { transform: translateX(-6px); }
-      80%       { transform: translateX(6px); }
+      0%,100% { transform:translateX(0)   scale(1);    }
+      20%     { transform:translateX(-9px) scale(0.96); }
+      40%     { transform:translateX(9px)  scale(0.96); }
+      60%     { transform:translateX(-6px) scale(0.98); }
+      80%     { transform:translateX(6px)  scale(0.98); }
     }
     .bubble-wrong {
-      animation: wrongShake 0.35s ease forwards !important;
+      animation: wrongShake 0.38s ease forwards !important;
       pointer-events: none !important;
     }
 
     /* ── 이펙트 레이어 ── */
     .fx-layer {
-      position: absolute; top: 0; left: 0;
-      width: 100%; height: 100%; pointer-events: none; z-index: 200;
+      position:absolute; top:0; left:0;
+      width:100%; height:100%; pointer-events:none; z-index:200;
     }
     .effect-score {
-      position: absolute; font-size: 45px; font-weight: bold;
-      animation: scorePop 0.8s ease-out forwards; pointer-events: none;
+      position:absolute; font-size:45px; font-weight:bold; pointer-events:none;
+      animation: scorePop 0.8s ease-out forwards;
     }
     @keyframes scorePop {
-      0%   { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
-      20%  { transform: translate(-50%, -20px) scale(1.3); opacity: 1; }
-      100% { transform: translate(-50%, -100px) scale(1); opacity: 0; }
+      0%   { transform:translate(-50%,0)    scale(0.5); opacity:0; }
+      20%  { transform:translate(-50%,-20px) scale(1.3); opacity:1; }
+      100% { transform:translate(-50%,-100px) scale(1); opacity:0; }
     }
 
-    /* ── 셋업 / 결과 오버레이 공통 ── */
+    /* ── 셋업 / 결과 오버레이 ── */
     .overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: white; display: flex; flex-direction: column;
-      align-items: center; z-index: 1000; padding: 20px; overflow-y: auto;
+      position:fixed; top:0; left:0; width:100%; height:100%;
+      background:white; display:flex; flex-direction:column;
+      align-items:center; z-index:1000; padding:20px; overflow-y:auto;
     }
     .game-logo-box {
-      width: 75px; height: 75px; background: #fbbf24;
-      border-radius: 20px; display: flex; align-items: center; justify-content: center;
-      font-size: 45px; margin-top: 5px; box-shadow: 0 6px 0 #ca8a04;
+      width:75px; height:75px; background:#fbbf24;
+      border-radius:20px; display:flex; align-items:center; justify-content:center;
+      font-size:45px; margin-top:5px; box-shadow:0 6px 0 #ca8a04;
     }
     .option-card {
-      width: 100%; max-width: 400px;
-      background: #f1f5f9; border-radius: 18px;
-      padding: 12px; margin-top: 10px;
+      width:100%; max-width:400px;
+      background:#f1f5f9; border-radius:18px; padding:12px; margin-top:10px;
     }
-    .btn-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
-      gap: 6px;
-    }
+    .option-label { text-align:center; color:#64748b; margin-bottom:8px; font-size:15px; }
+    .btn-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(65px,1fr)); gap:6px; }
     .choice-btn {
-      padding: 12px 4px; font-size: 14px; font-family: var(--main-font);
-      background: white; border: 2px solid #cbd5e1; border-radius: 12px;
-      cursor: pointer; color: #334155;
+      padding:12px 4px; font-size:14px; font-family:var(--main-font);
+      background:white; border:2px solid #cbd5e1; border-radius:12px;
+      cursor:pointer; color:#334155; transition:all 0.15s;
     }
     .choice-btn.active {
-      border-color: var(--sky-blue); background: var(--sky-blue);
-      color: white; box-shadow: 0 3px 0 #0369a1;
+      border-color:var(--sky-blue); background:var(--sky-blue);
+      color:white; box-shadow:0 3px 0 #0369a1;
     }
     .final-start-btn {
-      width: 80%; max-width: 300px; padding: 18px; font-size: 26px;
-      background: #fbbf24; color: white; border: none; border-radius: 50px;
-      box-shadow: 0 6px 0 #ca8a04; cursor: pointer; margin: 25px 0;
-      font-family: var(--main-font);
+      width:80%; max-width:300px; padding:18px; font-size:26px;
+      background:#fbbf24; color:white; border:none; border-radius:50px;
+      box-shadow:0 6px 0 #ca8a04; cursor:pointer; margin:25px 0;
+      font-family:var(--main-font); transition:all 0.1s;
     }
-    .final-start-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 #ca8a04; }
+    .final-start-btn:active { transform:translateY(3px); box-shadow:0 3px 0 #ca8a04; }
 
     /* ── 결과 카드 ── */
     .result-card {
-      background: white; padding: 15px; border-radius: 20px;
-      border: 4px solid var(--theme); text-align: center; width: 120px;
-      position: relative;
+      background:white; padding:15px 12px 12px; border-radius:20px;
+      border:4px solid var(--theme); text-align:center;
+      width:130px; position:relative; margin-top:22px;
     }
     .rank-badge {
-      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
-      font-size: 26px; line-height: 1;
+      position:absolute; top:-18px; left:50%; transform:translateX(-50%);
+      font-size:28px; line-height:1;
     }
 
-    /* ── 반응형: 모바일 ── */
-    @media (max-width: 600px) {
-      #main-container { flex-wrap: wrap; }
-
-      /* 1인 */
-      .player-zone.solo { flex: 1 1 100%; height: 100%; border-right: none; }
-
-      /* 2인: 좌우 분할 */
-      .players-2 .player-zone { flex: 1 1 50%; height: 100%; }
-      .players-2 .player-zone:last-child { border-right: none; }
-
-      /* 3인: 위 2개 + 아래 1개 전체 폭 */
-      .players-3 .player-zone { flex: 1 1 50%; height: 50%; }
-      .players-3 .player-zone:nth-child(2) { border-right: none; }
-      .players-3 .player-zone:nth-child(3) {
-        flex: 1 1 100%; height: 50%; border-right: none;
-      }
-
-      /* 4인: 2×2 그리드 */
-      .players-4 .player-zone { flex: 1 1 50%; height: 50%; }
-      .players-4 .player-zone:nth-child(even) { border-right: none; }
+    /* ── 반응형 ── */
+    @media (max-width:600px) {
+      #main-container { flex-wrap:wrap; }
+      .players-1 .player-zone { flex:1 1 100%; height:100%; border-right:none; }
+      .players-2 .player-zone { flex:1 1 50%; height:100%; }
+      .players-2 .player-zone:last-child { border-right:none; }
+      .players-3 .player-zone              { flex:1 1 50%; height:50%; }
+      .players-3 .player-zone:nth-child(2) { border-right:none; }
+      .players-3 .player-zone:nth-child(3) { flex:1 1 100%; height:50%; border-right:none; }
+      .players-4 .player-zone              { flex:1 1 50%; height:50%; }
+      .players-4 .player-zone:nth-child(even) { border-right:none; }
     }
   </style>
 </head>
@@ -205,14 +211,13 @@
 
 <div class="bg-pattern"></div>
 
-<!-- ───────────────── 셋업 오버레이 ───────────────── -->
+<!-- ══════════ 셋업 ══════════ -->
 <div id="setup-overlay" class="overlay">
   <div class="game-logo-box">🫧</div>
-  <h1 style="font-size:28px; color:#1e293b; margin:10px 0 0;">팡팡! 구구단 대모험</h1>
+  <h1 style="font-size:28px;color:#1e293b;margin:10px 0 0;">팡팡! 구구단 대모험</h1>
 
-  <!-- 인원 -->
   <div class="option-card">
-    <div style="text-align:center; color:#64748b; margin-bottom:8px;">👥 인원 선택</div>
+    <div class="option-label">👥 인원 선택</div>
     <div class="btn-grid" data-group="pCount">
       <button class="choice-btn active" onclick="setOpt('pCount',1,this)">1인용</button>
       <button class="choice-btn"        onclick="setOpt('pCount',2,this)">2인용</button>
@@ -220,40 +225,32 @@
       <button class="choice-btn"        onclick="setOpt('pCount',4,this)">4인용</button>
     </div>
   </div>
-
-  <!-- 난이도 -->
   <div class="option-card">
-    <div style="text-align:center; color:#64748b; margin-bottom:8px;">⚡ 난이도</div>
+    <div class="option-label">⚡ 난이도</div>
     <div class="btn-grid" data-group="speed">
       <button class="choice-btn active" onclick="setOpt('speed',1,this)">천천히</button>
       <button class="choice-btn"        onclick="setOpt('speed',1.8,this)">보통</button>
       <button class="choice-btn"        onclick="setOpt('speed',2.6,this)">번개</button>
     </div>
   </div>
-
-  <!-- 비눗방울 수 -->
   <div class="option-card">
-    <div style="text-align:center; color:#64748b; margin-bottom:8px;">🎈 비눗방울</div>
+    <div class="option-label">🎈 비눗방울</div>
     <div class="btn-grid" data-group="bCount">
       <button class="choice-btn active" onclick="setOpt('bCount',4,this)">4개</button>
       <button class="choice-btn"        onclick="setOpt('bCount',5,this)">5개</button>
       <button class="choice-btn"        onclick="setOpt('bCount',6,this)">6개</button>
     </div>
   </div>
-
-  <!-- 시간 -->
   <div class="option-card">
-    <div style="text-align:center; color:#64748b; margin-bottom:8px;">⏰ 시간</div>
+    <div class="option-label">⏰ 시간</div>
     <div class="btn-grid" data-group="time">
       <button class="choice-btn active" onclick="setOpt('time',30,this)">30초</button>
       <button class="choice-btn"        onclick="setOpt('time',60,this)">1분</button>
       <button class="choice-btn"        onclick="setOpt('time',120,this)">2분</button>
     </div>
   </div>
-
-  <!-- [FIX] 사운드 토글 UI 추가 -->
   <div class="option-card">
-    <div style="text-align:center; color:#64748b; margin-bottom:8px;">🔊 사운드</div>
+    <div class="option-label">🔊 사운드</div>
     <div class="btn-grid" data-group="sound">
       <button class="choice-btn active" onclick="setOpt('sound',true,this)">🔊 ON</button>
       <button class="choice-btn"        onclick="setOpt('sound',false,this)">🔇 OFF</button>
@@ -263,391 +260,352 @@
   <button class="final-start-btn" onclick="startGame()">탐험 시작!</button>
 </div>
 
-<!-- ───────────────── 글로벌 타이머 ───────────────── -->
+<!-- ══════════ 타이머 ══════════ -->
 <div id="global-timer-unit">
   <div class="timer-num" id="global-time-num">30</div>
-  <div class="timer-container">
-    <div class="timer-bar" id="global-time-bar"></div>
-  </div>
+  <div class="timer-container"><div class="timer-bar" id="global-time-bar"></div></div>
 </div>
 
-<!-- ───────────────── 게임 영역 ───────────────── -->
+<!-- ══════════ 게임 영역 ══════════ -->
 <div id="main-container"></div>
 
-<!-- ───────────────── 결과 오버레이 ───────────────── -->
-<div id="result-overlay" class="overlay" style="display:none; justify-content:center;">
-  <h1 style="font-size:36px; margin-bottom:20px;">🏆 탐험 결과</h1>
-  <div id="rankings" style="display:flex; gap:15px; flex-wrap:wrap; justify-content:center;"></div>
+<!-- ══════════ 결과 ══════════ -->
+<div id="result-overlay" class="overlay" style="display:none;justify-content:center;">
+  <h1 style="font-size:36px;margin-bottom:10px;">🏆 탐험 결과</h1>
+  <div id="rankings" style="display:flex;gap:15px;flex-wrap:wrap;justify-content:center;"></div>
   <button class="final-start-btn" onclick="resetToSetup()">다시 하기</button>
 </div>
 
 <script>
-  /* ═══════════════════════════════════════════
-     상태 변수
-  ═══════════════════════════════════════════ */
-  let opts = { pCount: 1, speed: 1, time: 30, bCount: 4, sound: true };
-  let audioCtx  = null;
-  let players   = [];
-  let isGameActive = false;
-  let animId    = null;          // [FIX] rAF ID 명시적 관리
-  let globalTimerID = null;      // [FIX] setInterval ID 명시적 관리
-  let globalTimeLeft = 30;
-  let areaDimensions = {};       // [FIX] offsetWidth 캐싱용
+/* ════════ 플레이어 정의 ════════ */
+const ANIMALS = [
+  { emoji:'🐻', name:'곰돌이', color:'#fbbf24', rgba:'rgba(251,191,36,0.88)'  },
+  { emoji:'🐰', name:'토끼',   color:'#f472b6', rgba:'rgba(244,114,182,0.88)' },
+  { emoji:'🐱', name:'고양이', color:'#22d3ee', rgba:'rgba(34,211,238,0.88)'  },
+  { emoji:'🐶', name:'강아지', color:'#4ade80', rgba:'rgba(74,222,128,0.88)'  },
+];
 
-  /* ═══════════════════════════════════════════
-     오디오
-  ═══════════════════════════════════════════ */
-  function unlockAudio() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
+/* ════════ 전역 상태 ════════ */
+let opts          = { pCount:1, speed:1, time:30, bCount:4, sound:true };
+let audioCtx      = null;
+let players       = [];
+let isGameActive  = false;
+let animId        = null;
+let globalTimerID = null;
+let globalTimeLeft = 30;
+let cachedDims    = {};
+
+/* ════════ 오디오 ════════ */
+function unlockAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+function playTone(freq, dur, type = 'sine') {
+  if (!opts.sound || !audioCtx) return;
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime + dur);
+  } catch(e) {}
+}
+
+/* ════════ 셋업 UI ════════ */
+function setOpt(key, val, el) {
+  unlockAudio();
+  opts[key] = val;
+  const grp = el.closest('[data-group]');
+  if (grp) grp.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+/* ════════ 게임 시작 ════════ */
+function startGame() {
+  unlockAudio();
+  cancelAnimationFrame(animId);
+  clearInterval(globalTimerID);
+  isGameActive = false;
+
+  document.getElementById('setup-overlay').style.display     = 'none';
+  document.getElementById('global-timer-unit').style.display = 'flex';
+
+  const container = document.getElementById('main-container');
+  container.innerHTML = '';
+  container.className = `players-${opts.pCount}`;
+  players = []; cachedDims = {};
+  globalTimeLeft = opts.time;
+
+  for (let i = 0; i < opts.pCount; i++) {
+    const p = { id:i, score:0, currentAnswer:0, animal:ANIMALS[i], bubbles:[] };
+    players.push(p);
+
+    const zone = document.createElement('div');
+    zone.className = `player-zone zone-${i}`;
+    zone.innerHTML = `
+      <div class="fx-layer" id="fx-${i}"></div>
+      <div class="question-box" id="q-${i}">? × ?</div>
+      <div id="area-${i}" style="flex:1;width:100%;position:relative;"></div>
+      <div class="bottom-hud">
+        <div class="status-pill">${p.animal.emoji} ${p.animal.name}</div>
+        <div class="status-pill">⭐ <span id="score-${i}">0</span></div>
+      </div>
+    `;
+    container.appendChild(zone);
   }
-  function playTone(freq, dur, type = 'sine') {
-    if (!opts.sound || !audioCtx) return;
-    try {
-      const osc  = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
-      osc.connect(gain); gain.connect(audioCtx.destination);
-      osc.start(); osc.stop(audioCtx.currentTime + dur);
-    } catch(e) {}
-  }
 
-  /* ═══════════════════════════════════════════
-     셋업 UI 헬퍼
-  ═══════════════════════════════════════════ */
-  // [FIX] data-group 속성으로 버튼 그룹 특정 → parentElement 의존 제거
-  function setOpt(key, val, el) {
-    unlockAudio();
-    opts[key] = val;
-    const group = el.closest('[data-group]');
-    if (group) {
-      group.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('active'));
-    }
-    el.classList.add('active');
-  }
+  isGameActive = true;
 
-  /* ═══════════════════════════════════════════
-     플레이어 정의
-  ═══════════════════════════════════════════ */
-  const animals = [
-    { emoji: '🐻', name: '곰돌이', color: '#fbbf24' },
-    { emoji: '🐰', name: '토끼',   color: '#f472b6' },
-    { emoji: '🐱', name: '고양이', color: '#22d3ee' },
-    { emoji: '🐶', name: '강아지', color: '#4ade80' },
-  ];
-
-  /* ═══════════════════════════════════════════
-     게임 시작
-  ═══════════════════════════════════════════ */
-  function startGame() {
-    unlockAudio();
-
-    // [FIX] 이전 루프 반드시 정리
-    cancelAnimationFrame(animId);
-    clearInterval(globalTimerID);
-    isGameActive = false;
-
-    document.getElementById('setup-overlay').style.display = 'none';
-    document.getElementById('global-timer-unit').style.display = 'flex';
-
-    const container = document.getElementById('main-container');
-    container.innerHTML = '';
-    players = [];
-    areaDimensions = {};
-    globalTimeLeft  = opts.time;
-
-    // [FIX] 인원수별 클래스 적용 (반응형 레이아웃)
-    container.className = `players-${opts.pCount}`;
-
-    for (let i = 0; i < opts.pCount; i++) {
-      const p = {
-        id: i, score: 0,
-        currentAnswer: 0,
-        animal: animals[i],
-        bubbles: [],
-      };
-      players.push(p);
-
-      const zone = document.createElement('div');
-      zone.className = `player-zone zone-${i}${opts.pCount === 1 ? ' solo' : ''}`;
-      zone.innerHTML = `
-        <div class="fx-layer" id="fx-${i}"></div>
-        <div class="question-box" id="q-${i}">? × ?</div>
-        <div id="bubble-area-${i}" style="flex:1; width:100%; position:relative;"></div>
-        <div class="bottom-hud">
-          <div class="status-pill">${p.animal.emoji} ${p.animal.name}</div>
-          <div class="status-pill">⭐ <span id="score-${i}">0</span></div>
-        </div>
-      `;
-      container.appendChild(zone);
-    }
-
-    isGameActive = true;
-
-    // [FIX] 영역 크기 캐싱 (레이아웃 reflow 방지)
-    requestAnimationFrame(() => {
-      players.forEach(p => {
-        const area = document.getElementById(`bubble-area-${p.id}`);
-        if (area) {
-          areaDimensions[p.id] = {
-            w: area.offsetWidth,
-            h: area.offsetHeight,
-          };
-        }
-        nextQuestion(p);
-      });
-      startGlobalTimer();
-      animate();
+  /* 이중 rAF: 레이아웃 완전 확정 후 치수 측정 */
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    players.forEach(p => {
+      const area = document.getElementById(`area-${p.id}`);
+      if (area) cachedDims[p.id] = { w: area.offsetWidth, h: area.offsetHeight };
+      nextQuestion(p);
     });
-  }
+    startGlobalTimer();
+    animate();
+  }));
+}
 
-  /* ═══════════════════════════════════════════
-     글로벌 타이머
-  ═══════════════════════════════════════════ */
-  function startGlobalTimer() {
-    const numEl = document.getElementById('global-time-num');
-    const barEl = document.getElementById('global-time-bar');
-    numEl.classList.remove('emergency-text');
-    numEl.innerText  = globalTimeLeft;
-    barEl.style.width = '100%';
+/* ════════ 타이머 ════════ */
+function startGlobalTimer() {
+  const numEl = document.getElementById('global-time-num');
+  const barEl = document.getElementById('global-time-bar');
+  numEl.classList.remove('emergency-text');
+  numEl.innerText = globalTimeLeft;
+  barEl.style.width = '100%';
 
-    // [FIX] globalTimerID 저장 → 재시작 시 clearInterval 가능
-    globalTimerID = setInterval(() => {
-      if (!isGameActive) { clearInterval(globalTimerID); return; }
-      globalTimeLeft--;
-      numEl.innerText = globalTimeLeft;
-      barEl.style.width = ((globalTimeLeft / opts.time) * 100) + '%';
-
-      if (globalTimeLeft <= 5) {
-        numEl.classList.add('emergency-text');
-        if (opts.sound) playTone(150, 0.1, 'sine');
-      }
-      if (globalTimeLeft <= 0) {
-        clearInterval(globalTimerID);
-        isGameActive = false;
-        cancelAnimationFrame(animId);
-        if (opts.sound) [440, 554, 659].forEach(f => playTone(f, 0.8, 'triangle'));
-        showResults();
-      }
-    }, 1000);
-  }
-
-  /* ═══════════════════════════════════════════
-     문제 생성
-  ═══════════════════════════════════════════ */
-  function nextQuestion(p) {
-    const a = Math.floor(Math.random() * 8) + 2;  // 2~9
-    const b = Math.floor(Math.random() * 9) + 1;  // 1~9
-    p.currentAnswer = a * b;
-    const qEl = document.getElementById(`q-${p.id}`);
-    if (qEl) qEl.innerText = `${a} × ${b}`;
-    createBubbles(p);
-  }
-
-  /* ═══════════════════════════════════════════
-     비눗방울 생성
-     [FIX] 동일 값 중복 방지 (값 기준, 수식 기준 아님)
-  ═══════════════════════════════════════════ */
-  function createBubbles(p) {
-    const area = document.getElementById(`bubble-area-${p.id}`);
-    if (!area) return;
-    area.innerHTML = '';
-    p.bubbles = [];
-
-    // [FIX] 캐싱된 영역 크기 우선 사용
-    const dim = areaDimensions[p.id] || {
-      w: area.offsetWidth,
-      h: area.offsetHeight,
-    };
-
-    // 오답 선택지: 구구단 범위(2~81) 내 정답과 다른 값만 수집
-    const choices = [p.currentAnswer];
-    let attempts = 0;
-    while (choices.length < opts.bCount && attempts < 200) {
-      attempts++;
-      const w = (Math.floor(Math.random() * 8) + 2) * (Math.floor(Math.random() * 9) + 1);
-      // [FIX] 값 기준 중복 제거
-      if (!choices.includes(w)) choices.push(w);
+  globalTimerID = setInterval(() => {
+    if (!isGameActive) { clearInterval(globalTimerID); return; }
+    globalTimeLeft--;
+    numEl.innerText   = globalTimeLeft;
+    barEl.style.width = ((globalTimeLeft / opts.time) * 100) + '%';
+    if (globalTimeLeft <= 5) {
+      numEl.classList.add('emergency-text');
+      if (opts.sound) playTone(150, 0.1, 'sine');
     }
-    choices.sort(() => Math.random() - 0.5);
+    if (globalTimeLeft <= 0) {
+      clearInterval(globalTimerID);
+      isGameActive = false;
+      cancelAnimationFrame(animId);
+      if (opts.sound) [440,554,659].forEach(f => playTone(f, 0.8, 'triangle'));
+      showResults();
+    }
+  }, 1000);
+}
 
-    choices.forEach(val => {
-      const bEl  = document.createElement('div');
-      bEl.className = 'bubble';
-      const size = 75 + Math.random() * 15;
-      const x    = Math.random() * Math.max(0, dim.w - size);
-      const y    = dim.h + 20;
-      // [FIX] cssText 대신 개별 style 속성 → .bubble 클래스의 flex/color 등 유지
-      bEl.style.width      = size + 'px';
-      bEl.style.height     = size + 'px';
-      bEl.style.left       = x + 'px';
-      bEl.style.top        = y + 'px';
-      bEl.style.background = p.animal.color + 'dd';
-      // [FIX] 숫자 텍스트 노드 추가
-      bEl.innerText = val;
-      bEl.onpointerdown = (e) => { e.preventDefault(); handlePick(p, val, bEl); };
-      area.appendChild(bEl);
-      p.bubbles.push({
-        el: bEl, x, y,
-        speed: (1.2 + Math.random()) * opts.speed,
-        wobble: Math.random() * Math.PI,
-      });
-    });
+/* ════════ 문제 생성 ════════ */
+function nextQuestion(p) {
+  const a = Math.floor(Math.random() * 8) + 2;
+  const b = Math.floor(Math.random() * 9) + 1;
+  p.currentAnswer = a * b;
+  const qEl = document.getElementById(`q-${p.id}`);
+  if (qEl) qEl.innerText = `${a} × ${b}`;
+  createBubbles(p);
+}
+
+/* ════════ 비눗방울 생성 ════════
+   수정 포인트:
+   · style 개별 속성 할당 (cssText 미사용)
+   · rgba() 배경 (8자리 hex 대신)
+   · textContent = String(val) 로 숫자 주입
+   · lineHeight = size+'px' (flex 미지원 fallback 수직 중앙)
+════════ */
+function createBubbles(p) {
+  const area = document.getElementById(`area-${p.id}`);
+  if (!area) return;
+  area.innerHTML = '';
+  p.bubbles = [];
+
+  const dim = cachedDims[p.id] || { w: area.offsetWidth, h: area.offsetHeight };
+
+  /* 선택지 생성: 값 기준 중복 제거 */
+  const choices = [p.currentAnswer];
+  let tries = 0;
+  while (choices.length < opts.bCount && tries < 300) {
+    tries++;
+    const w = (Math.floor(Math.random()*8)+2) * (Math.floor(Math.random()*9)+1);
+    if (!choices.includes(w)) choices.push(w);
   }
+  choices.sort(() => Math.random() - 0.5);
 
-  /* ═══════════════════════════════════════════
-     버블 클릭 처리
-     [FIX] 오답 버블: 흔들림 후 제거 + 배열에서도 삭제
-  ═══════════════════════════════════════════ */
-  function handlePick(p, val, el) {
-    if (!isGameActive) return;
+  choices.forEach(val => {
+    const bEl = document.createElement('div');
+    bEl.className = 'bubble';
 
-    const fxLayer = document.getElementById(`fx-${p.id}`);
-    if (!fxLayer) return;
-    const rect     = el.getBoundingClientRect();
-    const zoneRect = fxLayer.getBoundingClientRect();
-    const cX = rect.left - zoneRect.left + rect.width  / 2;
-    const cY = rect.top  - zoneRect.top  + rect.height / 2;
+    const size = Math.round(74 + Math.random() * 14);  /* 74~88px */
+    const x    = Math.random() * Math.max(0, dim.w - size);
+    const y    = dim.h + 20;
 
-    if (val === p.currentAnswer) {
-      /* ── 정답 ── */
-      p.score += 10;
-      playTone(880, 0.15, 'sine');
-      showFX(fxLayer, cX, cY, p.animal.color, '+10', '#22c55e', true);
-      // 배열에서 제거 후 DOM 삭제
+    /* 위치·크기 */
+    bEl.style.width  = size + 'px';
+    bEl.style.height = size + 'px';
+    bEl.style.left   = x + 'px';
+    bEl.style.top    = y + 'px';
+
+    /* 배경: rgba() 형식 사용 */
+    bEl.style.background = p.animal.rgba;
+
+    /* 수직 중앙 보조 (line-height fallback) */
+    bEl.style.lineHeight = size + 'px';
+
+    /* 숫자 삽입 */
+    bEl.textContent = String(val);
+
+    bEl.onpointerdown = (e) => { e.preventDefault(); handlePick(p, val, bEl); };
+    area.appendChild(bEl);
+
+    p.bubbles.push({ el:bEl, x, y,
+      speed:  (1.2 + Math.random()) * opts.speed,
+      wobble: Math.random() * Math.PI,
+      size,
+    });
+  });
+}
+
+/* ════════ 버블 클릭 ════════ */
+function handlePick(p, val, el) {
+  if (!isGameActive) return;
+  const fxLayer = document.getElementById(`fx-${p.id}`);
+  if (!fxLayer) return;
+
+  const rect  = el.getBoundingClientRect();
+  const zRect = fxLayer.getBoundingClientRect();
+  const cX = rect.left - zRect.left + rect.width  / 2;
+  const cY = rect.top  - zRect.top  + rect.height / 2;
+
+  if (val === p.currentAnswer) {
+    p.score += 10;
+    playTone(880, 0.15, 'sine');
+    spawnFX(fxLayer, cX, cY, p.animal.color, '+10', '#22c55e', true);
+    p.bubbles = p.bubbles.filter(b => b.el !== el);
+    el.remove();
+    nextQuestion(p);
+  } else {
+    p.score = Math.max(0, p.score - 5);
+    playTone(220, 0.3, 'square');
+    spawnFX(fxLayer, cX, cY, '#ef4444', '-5', '#ef4444', false);
+    el.classList.add('bubble-wrong');
+    el.style.pointerEvents = 'none';
+    setTimeout(() => {
       p.bubbles = p.bubbles.filter(b => b.el !== el);
       el.remove();
-      nextQuestion(p);
-    } else {
-      /* ── 오답 ── */
-      p.score = Math.max(0, p.score - 5);
-      playTone(220, 0.3, 'square');
-      showFX(fxLayer, cX, cY, '#ef4444', '-5', '#ef4444', false);
-
-      // [FIX] 흔들림 애니메이션 → 완료 후 버블 제거 (반복 클릭 방지)
-      el.classList.add('bubble-wrong');
-      el.style.pointerEvents = 'none';
-      setTimeout(() => {
-        p.bubbles = p.bubbles.filter(b => b.el !== el);
-        el.remove();
-        // [FIX] 버블이 너무 적어지면 새 세트 생성
-        if (p.bubbles.length === 0 && isGameActive) nextQuestion(p);
-      }, 380);
-    }
-
-    const scoreEl = document.getElementById(`score-${p.id}`);
-    if (scoreEl) scoreEl.innerText = p.score;
+      if (p.bubbles.length === 0 && isGameActive) nextQuestion(p);
+    }, 400);
   }
 
-  /* ═══════════════════════════════════════════
-     이펙트 (파티클 + 점수 팝업)
-  ═══════════════════════════════════════════ */
-  function showFX(layer, x, y, color, text, textColor, isCorrect = true) {
-    const s = document.createElement('div');
-    s.className = 'effect-score';
-    s.innerText = text;
-    s.style.cssText = `left:${x}px; top:${y}px; color:${textColor};`;
-    layer.appendChild(s);
-    setTimeout(() => s.remove(), 800);
+  const scoreEl = document.getElementById(`score-${p.id}`);
+  if (scoreEl) scoreEl.innerText = p.score;
+}
 
-    if (isCorrect) {
-      for (let i = 0; i < 8; i++) {
-        const pt = document.createElement('div');
-        pt.style.cssText = `width:10px; height:10px; background:${color}; left:${x}px; top:${y}px; position:absolute; border-radius:50%;`;
-        layer.appendChild(pt);
-        const angle = (Math.PI * 2 / 8) * i;
-        const vel   = 4 + Math.random() * 5;
-        let cx = x, cy = y, op = 1;
-        const move = () => {
-          cx += Math.cos(angle) * vel;
-          cy += Math.sin(angle) * vel;
-          op -= 0.05;
-          pt.style.left    = cx + 'px';
-          pt.style.top     = cy + 'px';
-          pt.style.opacity = op;
-          if (op > 0) requestAnimationFrame(move);
-          else pt.remove();
-        };
-        move();
+/* ════════ 이펙트 ════════ */
+function spawnFX(layer, x, y, color, text, textColor, isCorrect) {
+  const s = document.createElement('div');
+  s.className = 'effect-score';
+  s.innerText = text;
+  s.style.left  = x + 'px';
+  s.style.top   = y + 'px';
+  s.style.color = textColor;
+  layer.appendChild(s);
+  setTimeout(() => s.remove(), 820);
+
+  if (isCorrect) {
+    for (let i = 0; i < 10; i++) {
+      const pt = document.createElement('div');
+      pt.style.cssText = `position:absolute;border-radius:50%;width:10px;height:10px;background:${color};left:${x}px;top:${y}px;pointer-events:none;`;
+      layer.appendChild(pt);
+      const angle = (Math.PI * 2 / 10) * i;
+      const vel   = 4 + Math.random() * 5;
+      let cx = x, cy = y, op = 1;
+      const step = () => {
+        cx += Math.cos(angle) * vel; cy += Math.sin(angle) * vel; op -= 0.05;
+        pt.style.left = cx+'px'; pt.style.top = cy+'px'; pt.style.opacity = op;
+        if (op > 0) requestAnimationFrame(step); else pt.remove();
+      };
+      step();
+    }
+  }
+}
+
+/* ════════ 애니메이션 루프 ════════ */
+function animate() {
+  if (!isGameActive) return;
+  for (const p of players) {
+    const dim = cachedDims[p.id];
+    if (!dim) continue;
+    for (const b of p.bubbles) {
+      b.y      -= b.speed;
+      b.wobble += 0.04;
+      b.el.style.top  = b.y + 'px';
+      b.el.style.left = (b.x + Math.sin(b.wobble) * 14) + 'px';
+      if (b.y < -(b.size + 10)) {
+        b.y = dim.h + 20;
+        b.x = Math.random() * Math.max(0, dim.w - b.size);
+        b.el.style.top  = b.y + 'px';
+        b.el.style.left = b.x + 'px';
       }
     }
   }
+  animId = requestAnimationFrame(animate);
+}
 
-  /* ═══════════════════════════════════════════
-     애니메이션 루프
-     [FIX] offsetWidth 매 프레임 호출 제거 → 캐싱된 값 사용
-  ═══════════════════════════════════════════ */
-  function animate() {
-    if (!isGameActive) return;
-    players.forEach(p => {
-      const dim = areaDimensions[p.id];
-      if (!dim) return;
-      p.bubbles.forEach(b => {
-        b.y       -= b.speed;
-        b.wobble  += 0.04;
-        b.el.style.top  = b.y + 'px';
-        b.el.style.left = (b.x + Math.sin(b.wobble) * 15) + 'px';
-        // 화면 위로 나가면 아래에서 재등장
-        if (b.y < -150) {
-          b.y = dim.h + 20;
-          b.x = Math.random() * Math.max(0, dim.w - 100);
-        }
-      });
-    });
-    animId = requestAnimationFrame(animate);
-  }
+/* ════════ 결과 화면 ════════
+   동순위 처리:
+   · 점수가 같으면 같은 메달
+   · 3위(인덱스 2) 이하는 모두 🥉
+════════ */
+function showResults() {
+  document.getElementById('global-timer-unit').style.display = 'none';
 
-  /* ═══════════════════════════════════════════
-     결과 표시
-     [FIX] 점수 내림차순 정렬 + 순위 메달 표시
-  ═══════════════════════════════════════════ */
-  function showResults() {
-    document.getElementById('global-timer-unit').style.display = 'none';
+  const sorted = [...players].sort((a, b) => b.score - a.score);
+  const MEDALS  = ['🥇', '🥈', '🥉'];
 
-    // [FIX] 점수 내림차순 정렬
-    const sorted = [...players].sort((a, b) => b.score - a.score);
-    const medals = ['🥇', '🥈', '🥉', '4️⃣'];
+  /* 동순위 rank 계산 */
+  const ranks = [];
+  let curRank = 0;
+  sorted.forEach((p, idx) => {
+    if (idx > 0 && p.score < sorted[idx - 1].score) curRank = idx;
+    ranks.push(curRank);
+  });
 
-    const rankArea = document.getElementById('rankings');
-    rankArea.innerHTML = '';
+  const rankArea = document.getElementById('rankings');
+  rankArea.innerHTML = '';
 
-    sorted.forEach((p, rank) => {
-      const card = document.createElement('div');
-      card.className = 'result-card';
-      card.style.setProperty('--theme', p.animal.color);
-      card.innerHTML = `
-        <div class="rank-badge">${medals[rank] || ''}</div>
-        <div style="font-size:45px; margin-top:8px;">${p.animal.emoji}</div>
-        <h3 style="margin:4px 0;">${p.animal.name}</h3>
-        <div style="font-size:26px; font-weight:bold;">${p.score}점</div>
-      `;
-      rankArea.appendChild(card);
-    });
+  sorted.forEach((p, idx) => {
+    /* rank가 2 이상이면 모두 🥉 (공동 3등) */
+    const medal = MEDALS[Math.min(ranks[idx], 2)];
 
-    document.getElementById('result-overlay').style.display = 'flex';
-  }
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    card.style.setProperty('--theme', p.animal.color);
+    card.innerHTML = `
+      <div class="rank-badge">${medal}</div>
+      <div style="font-size:50px;margin-top:6px;line-height:1.15;">${p.animal.emoji}</div>
+      <div style="font-size:16px;margin:6px 0 2px;">${p.animal.name}</div>
+      <div style="font-size:28px;font-weight:bold;">${p.score}점</div>
+    `;
+    rankArea.appendChild(card);
+  });
 
-  /* ═══════════════════════════════════════════
-     다시 하기
-     [FIX] 모든 루프 정리 후 초기화
-  ═══════════════════════════════════════════ */
-  function resetToSetup() {
-    // [FIX] 루프 정리
-    cancelAnimationFrame(animId);
-    clearInterval(globalTimerID);
-    isGameActive = false;
+  document.getElementById('result-overlay').style.display = 'flex';
+}
 
-    document.getElementById('result-overlay').style.display = 'none';
-    document.getElementById('setup-overlay').style.display  = 'flex';
-    document.getElementById('main-container').innerHTML      = '';
-    document.getElementById('main-container').className      = '';
+/* ════════ 다시 하기 ════════ */
+function resetToSetup() {
+  cancelAnimationFrame(animId);
+  clearInterval(globalTimerID);
+  isGameActive = false;
+  players = []; cachedDims = {};
 
-    players        = [];
-    areaDimensions = {};
-  }
+  document.getElementById('result-overlay').style.display = 'none';
+  document.getElementById('setup-overlay').style.display  = 'flex';
+  const mc = document.getElementById('main-container');
+  mc.innerHTML = ''; mc.className = '';
+}
 </script>
 </body>
 </html>
