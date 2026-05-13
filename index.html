@@ -16,7 +16,7 @@
     body {
       margin: 0; padding: 0;
       width: 100vw; 
-      height: 100vh; height: 100dvh; /* 모바일 동적 높이 완벽 대응 */
+      height: 100vh; height: 100dvh; /* 모바일 동적 높이 대응 */
       overflow: hidden;
       font-family: var(--main-font);
       background: var(--bg-color);
@@ -30,7 +30,7 @@
       background-size: 25px 25px; opacity: 0.4; z-index: 0;
     }
 
-    /* --- 중앙 상단 타이머 (그라데이션 완벽 고정형) --- */
+    /* --- 중앙 상단 타이머 --- */
     #global-timer-unit {
       position: absolute; top: env(safe-area-inset-top, 10px); 
       left: 50%; transform: translateX(-50%);
@@ -39,8 +39,7 @@
     }
     .timer-num {
       font-size: clamp(35px, 6vmin, 45px); color: #fbbf24; margin-bottom: 2px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-      line-height: 1.1;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3); line-height: 1.1;
     }
     .timer-container {
       width: 100%; height: 18px; background: #334155;
@@ -49,9 +48,9 @@
     }
     .timer-bar {
       width: 100%; height: 100%; border-radius: 10px;
-      /* 핵심: 고정된 배경 그라데이션 */
+      /* 오른쪽(파랑/녹색) -> 왼쪽(빨강) 고정 그라데이션 */
       background: linear-gradient(to right, #ef4444 0%, #facc15 30%, #4ade80 70%, #0ea5e9 100%);
-      /* 핵심: 너비를 줄이는 게 아니라 오른쪽부터 잘라냄 (크롭 효과) */
+      /* 클립 마스크로 오른쪽부터 잘라냄 */
       clip-path: inset(0 0% 0 0); 
       transition: clip-path 1s linear;
     }
@@ -59,63 +58,55 @@
     .emergency-text { color: var(--danger) !important; animation: blink 0.5s infinite; }
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-    /* --- CSS GRID 레이아웃 (어떤 화면이든 잘림 방지) --- */
+    /* --- 4단 기둥 강제 고정 레이아웃 (Grid 제거, Flex 복구) --- */
     #main-container { 
-      display: grid; width: 100vw; height: 100%; 
-      position: relative; z-index: 10; 
-      padding-top: 85px; /* 통합 타이머 공간 확보 */
-      gap: 0;
-    }
-
-    /* 인원수별 Grid 설정 (가로 모드 기본) */
-    .grid-p1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
-    .grid-p2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; }
-    .grid-p3 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
-    .grid-p4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
-
-    /* 세로 모드(스마트폰/태블릿 세로) Grid 반응형 적용 */
-    @media (orientation: portrait) {
-      .grid-p2 { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+      display: flex; flex-direction: row; flex-wrap: nowrap; /* 세로 분할 절대 금지 */
+      width: 100vw; height: 100%; position: relative; z-index: 10; 
+      padding-top: 85px; /* 타이머 공간 */
     }
 
     .player-zone {
-      position: relative;
+      flex: 1 1 0; min-width: 0; /* 공간에 맞춰 끝까지 수축 허용 */
+      height: 100%; position: relative;
       display: flex; flex-direction: column; align-items: center;
-      justify-content: space-between;
+      justify-content: space-between; /* 요소 겹침 방지 */
       border-right: 2px dashed rgba(0,0,0,0.1); 
-      border-bottom: 2px dashed rgba(0,0,0,0.1);
-      overflow: hidden; padding: 15px 5px;
+      padding: 10px 4px 20px 4px;
     }
+    .player-zone:last-child { border-right: none; }
     
     .zone-0 { background: rgba(254, 243, 199, 0.2); --theme: #fbbf24; }
     .zone-1 { background: rgba(252, 231, 243, 0.2); --theme: #f472b6; }
     .zone-2 { background: rgba(236, 254, 255, 0.2); --theme: #22d3ee; }
     .zone-3 { background: rgba(240, 253, 244, 0.2); --theme: #4ade80; }
 
+    /* 문제 박스 - 폭에 맞춰 자동 축소 */
     .question-box {
-      background: white; padding: 6px 20px;
-      border-radius: 15px; font-size: clamp(24px, 5vmin, 45px);
+      background: white; padding: 6px 12px;
+      border-radius: 15px; font-size: clamp(16px, 4vw, 45px); /* 모바일에서 자동 축소 */
       color: #1e293b; box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-      border: 4px solid var(--theme); z-index: 50;
+      border: 3.5px solid var(--theme); z-index: 50;
       animation: floatAnim 3s ease-in-out infinite;
-      flex-shrink: 0; line-height: 1.2;
+      flex-shrink: 0; white-space: nowrap; line-height: 1.2;
     }
     @keyframes floatAnim { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
     .bottom-hud {
-      width: 95%; display: flex; justify-content: space-between; gap: 5px;
-      flex-shrink: 0;
+      width: 100%; display: flex; flex-direction: row; justify-content: center; gap: 4px;
+      flex-shrink: 0; flex-wrap: wrap; /* 폭 좁으면 위아래 배치 허용 */
     }
     .status-pill {
-      background: white; padding: 6px 10px; border-radius: 50px;
-      font-size: clamp(12px, 3vmin, 16px); color: #334155; border: 2px solid var(--theme);
-      box-shadow: 0 3px 5px rgba(0,0,0,0.05); flex: 1; text-align: center;
+      background: white; padding: 4px 8px; border-radius: 50px;
+      font-size: clamp(11px, 2.5vw, 16px); color: #334155; border: 2px solid var(--theme);
+      box-shadow: 0 3px 5px rgba(0,0,0,0.05); flex: 1 1 auto; text-align: center;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
+    /* 비눗방울 기본 설정 (JS에서 폭에 맞춰 동적 조절) */
     .bubble {
       position: absolute; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: clamp(20px, 5vmin, 36px); font-weight: bold; color: white;
+      font-weight: bold; color: white;
       text-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer;
       box-shadow: inset -5px -5px 10px rgba(255,255,255,0.4), 0 5px 12px rgba(0,0,0,0.15);
       border: 3px solid rgba(255,255,255,0.8); z-index: 40;
@@ -123,7 +114,7 @@
 
     .fx-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 200; }
     .effect-score {
-      position: absolute; font-size: clamp(30px, 6vmin, 45px); font-weight: bold;
+      position: absolute; font-size: clamp(26px, 5vw, 45px); font-weight: bold;
       animation: scorePop 0.8s ease-out forwards; pointer-events: none;
       text-shadow: 2px 2px 5px rgba(0,0,0,0.2);
     }
@@ -246,22 +237,18 @@
   let animId;
   let globalTimeLeft = 30;
 
-  // --- 모바일 사운드 확실한 잠금 해제 ---
   function unlockAudio() {
     if (audioUnlocked) return;
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();
-    
-    // 무음 버퍼 재생으로 브라우저 권한 획득
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    gain.gain.value = 0; // 소리 안 나게
+    gain.gain.value = 0; 
     osc.connect(gain); gain.connect(audioCtx.destination);
     osc.start(); osc.stop(audioCtx.currentTime + 0.1);
     audioUnlocked = true;
   }
 
-  // 화면 터치 시 무조건 오디오 권한 획득 시도
   document.body.addEventListener('touchstart', unlockAudio, { once: true });
   document.body.addEventListener('click', unlockAudio, { once: true });
 
@@ -276,7 +263,7 @@
       gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
       osc.connect(gain); gain.connect(audioCtx.destination);
       osc.start(); osc.stop(audioCtx.currentTime + dur);
-    } catch(e) { console.log(e); }
+    } catch(e) {}
   }
 
   function setOpt(key, val, el) {
@@ -299,9 +286,6 @@
     document.getElementById('global-timer-unit').style.display = 'flex';
     const container = document.getElementById('main-container');
     container.innerHTML = '';
-    
-    // 인원수에 맞춘 CSS Grid 클래스 할당
-    container.className = `grid-p${opts.pCount}`;
     
     players = [];
     globalTimeLeft = opts.time;
@@ -338,7 +322,7 @@
       globalTimeLeft--;
       numEl.innerText = globalTimeLeft;
       
-      // clip-path를 이용해 그라데이션 고정 + 오른쪽에서부터 잘라냄
+      // 오른쪽에서부터 잘라냄 (시간 줄어듦에 따라 0% -> 100% 자르기)
       const cutPercent = 100 - ((globalTimeLeft / opts.time) * 100);
       barEl.style.clipPath = `inset(0 ${cutPercent}% 0 0)`;
       
@@ -375,15 +359,23 @@
       if(!choices.includes(w)) choices.push(w);
     }
     choices.sort(() => Math.random() - 0.5);
+    
+    // 기둥 폭에 맞춰 비눗방울 최대 크기 제한 (겹침 및 화면 이탈 완벽 방지)
+    const zoneWidth = area.offsetWidth;
+    const maxBSize = Math.max(40, zoneWidth * 0.7); 
+
     choices.forEach(val => {
       const bEl = document.createElement('div');
       bEl.className = 'bubble';
       bEl.innerText = val;
-      // 반응형 크기 계산 (vmin 기준)
-      const size = 60 + Math.random()*25;
-      const x = Math.random()*(area.offsetWidth - size);
+      
+      let size = 60 + Math.random()*25;
+      if (size > maxBSize) size = maxBSize; // 폭이 좁으면 자동 축소
+      
+      const x = Math.random()*(zoneWidth - size);
       const y = area.offsetHeight + 20;
-      bEl.style.cssText = `width:clamp(60px, 12vmin, 90px); height:clamp(60px, 12vmin, 90px); left:${x}px; top:${y}px; background:${p.animal.color}e6;`;
+      
+      bEl.style.cssText = `width:${size}px; height:${size}px; left:${x}px; top:${y}px; background:${p.animal.color}e6; font-size:${size*0.4}px;`;
       bEl.onpointerdown = (e) => { e.preventDefault(); handlePick(p, val, bEl); };
       area.appendChild(bEl);
       p.bubbles.push({ el: bEl, x, y, speed: (1.2 + Math.random()) * opts.speed, wobble: Math.random()*Math.PI });
@@ -448,7 +440,7 @@
         b.wobble += 0.04;
         b.el.style.top = b.y + 'px';
         b.el.style.left = (b.x + Math.sin(b.wobble)*15) + 'px';
-        if (b.y < -150) { b.y = area.offsetHeight + 20; b.x = Math.random()*(area.offsetWidth-80); }
+        if (b.y < -150) { b.y = area.offsetHeight + 20; b.x = Math.random()*(area.offsetWidth - b.el.offsetWidth); }
       });
     });
     animId = requestAnimationFrame(animate);
